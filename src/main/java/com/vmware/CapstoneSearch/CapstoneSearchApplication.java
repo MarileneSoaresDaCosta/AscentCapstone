@@ -16,4 +16,20 @@ public class CapstoneSearchApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CapstoneSearchApplication.class, args);
 	}
+	// adding sample data
+	@Bean
+	public CommandLineRunner demoData(PetsRepository petsRepository) {
+		return args -> {
+			List<Pet> pets;
+			pets = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				pets.add(new Pet("dog", "puppy"+i, "9100" + i));
+			}
+			for (int i = 0; i < 5; i++) {
+				pets.add(new Pet("cat", "kitty"+i, "9500" + i));
+			}
+			petsRepository.saveAll(pets);
+		};
+	}
+
 }
