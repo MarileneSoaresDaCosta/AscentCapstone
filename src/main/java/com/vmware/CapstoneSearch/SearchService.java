@@ -1,20 +1,40 @@
 package com.vmware.CapstoneSearch;
 
+import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Service
 public class SearchService {
-    PetsRepository petsRepository;
+//    PetsRepository petsRepository;
 
-    public SearchService(PetsRepository petsRepository) {
-        this.petsRepository = petsRepository;
+    private static final String PRODUCT_INDEX = "productindex";
+
+    private ElasticsearchOperations elasticsearchOperations;
+
+    @Autowired
+    public SearchService(final ElasticsearchOperations elasticsearchOperations) {
+        super();
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
+//    public SearchService(PetsRepository petsRepository) {
+//        this.petsRepository = petsRepository;
+//    }
+/*
     public Pet addPet(Pet pet) {
         return petsRepository.save(pet);
     }
@@ -45,4 +65,31 @@ public class SearchService {
 
         return new PetsList(results);
     }
+*/
+    public List<Pet> processSearch(final String query) {
+
+        // 1. Create query on multiple fields enabling fuzzy search
+        QueryBuilder queryBuilder =
+                        QueryBuilders
+                        .multiMatchQuery(query, "type", "breed")
+                        .fuzziness(Fuzziness.AUTO);
+
+        Query searchQuery = new NativeSearchQueryBuilder()
+                .withFilter(queryBuilder)
+                .build();
+
+        // 2. Execute search
+        SearchHits<Pet> petHits =
+                elasticsearchOperations
+                        .search(searchQuery, Pet.class,
+                                IndexCoordinates.of(PRODUCT_INDEX));
+
+        // 3. Map searchHits to product list
+        List<Pet> petMatches = new ArrayList<Pet>();
+        petHits.forEach(srchHit->{
+            petMatches.add(srchHit.getContent());
+        });
+        return petMatches;
+    }
+
 }
