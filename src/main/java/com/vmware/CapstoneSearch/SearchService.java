@@ -8,6 +8,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,8 +24,19 @@ public class SearchService {
         return petsRepository.save(pet);
     }
 
+    HttpHeaders createHeaders(String username, String password){
+        return new HttpHeaders() {{
+            String auth = username + ":" + password;
+            byte[] encodedAuth = Base64.getEncoder().encode(
+                    auth.getBytes(Charset.forName("US-ASCII")) );
+            String authHeader = "Basic " + new String( encodedAuth );
+            set( "Authorization", authHeader );
+        }};
+    }
+
     // get pets based on exact matches
     public PetsList getPets(String zip, String radius, String type, String breed, String age, String sex, String search, String adopted) throws JsonProcessingException {
+
         List<String> zips = new ArrayList<>();
         if (zip != null) {
 
@@ -39,9 +51,13 @@ public class SearchService {
             }
         }
 
+
+
         if (search != null) {
             RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpHeaders headers = createHeaders("elastic", System.getenv("ELASTIC_PASSWORD"));
             headers.setContentType(MediaType.APPLICATION_JSON);
             String query;
             if (search.equals("*")) {
@@ -109,7 +125,9 @@ public class SearchService {
 
     public List<String> getBreeds(String type) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = createHeaders("elastic", System.getenv("ELASTIC_PASSWORD"));
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String query = "{\"query\":{\"match_all\":{}}}";
@@ -143,7 +161,9 @@ public class SearchService {
     // gets documents using wildcard query
     public PetsList getSuggestions(String search) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = createHeaders("elastic", System.getenv("ELASTIC_PASSWORD"));
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> httpEntity = new HttpEntity<String>("{\"query\":{\"multi_match\":{\"query\":\"" + search + "*\",\"fields\":[\"breed\",\"age\",\"gender\",\"name\",\"type\"],\"fuzziness\":\"2\"}}}", headers);
         ResponseEntity<SearchResults> response = restTemplate.exchange("http://elasticsearch:9200/pets/_search?pretty", HttpMethod.POST, httpEntity, SearchResults.class);

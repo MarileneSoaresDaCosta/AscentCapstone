@@ -24,8 +24,8 @@ services:
         fi;
         echo "Setting file permissions"
         chown -R root:root config/certs;
-        find . -type d -exec chmod 750 \{\} \;;
-        find . -type f -exec chmod 640 \{\} \;;
+        find . -type d -exec chmod 777 \{\} \;;
+        find . -type f -exec chmod 777 \{\} \;;
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
@@ -88,7 +88,7 @@ services:
       - cluster.name=springelasticgenie
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "discovery.type=single-node"
-      - "ELASTIC_PASSWORD=elastic"
+#      - "ELASTIC_PASSWORD=elastic"
     ulimits:
       memlock:
         soft: -1
@@ -129,10 +129,12 @@ services:
       - certs:/usr/share/kibana/config/certs
     ports:
       - "5601:5601"
-    environment:
-      - ELASTICSEACH_URL=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=20Bm08n08iWL-BELTzrg
+    env_file:
+      - core.env
+#    environment:
+#      - ELASTICSEACH_URL=http://elasticsearch:9200
+#      - ELASTICSEARCH_USERNAME=kibana_system
+#      - ELASTICSEARCH_PASSWORD=20Bm08n08iWL-BELTzrg
     links:
       - elasticsearch
     depends_on:
