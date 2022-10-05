@@ -1,9 +1,16 @@
 # AscentCapstone
 This is the backend for our capstone project in the VMWare Ascent Program (Bootcamp) - july / septempter 2022
 
+
+
+
 My group was in charge of the search feature, developed in Java / SpringBoot & Elasticsearch (ELK stack)
 
 <img width="1326" alt="Screen Shot 2022-09-30 at 1 03 08 PM" src="https://user-images.githubusercontent.com/18127240/194163983-2eb729a5-d769-46f9-8764-d33a3cad0c7c.png">
+
+
+<img width="1008" alt="Screen Shot 2022-10-05 at 3 26 37 PM" src="https://user-images.githubusercontent.com/18127240/194167071-52be9c14-957f-439d-90fb-d05029729381.png">
+<img width="1013" alt="Screen Shot 2022-10-05 at 3 27 03 PM" src="https://user-images.githubusercontent.com/18127240/194167127-c2971e28-d9aa-439c-ba77-b25485a917f0.png">
 
 I was in charge of developing an autocomplete feature for the search.
 
